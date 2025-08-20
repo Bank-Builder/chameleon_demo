@@ -27,6 +27,29 @@ else
     fi
 fi
 
+# Test ACME database if it exists
+echo -e "\n${YELLOW}Testing ACME Corporation database...${NC}"
+if docker exec msqlchamo_mysql mysql -u root -prootpassword -e "USE acme_corp; SHOW TABLES;" 2>/dev/null; then
+    echo -e "${GREEN}ACME database found!${NC}"
+    echo -e "${YELLOW}ACME database tables:${NC}"
+    docker exec msqlchamo_mysql mysql -u root -prootpassword acme_corp -e "SHOW TABLES;"
+    
+    echo -e "\n${YELLOW}ACME database sample data summary:${NC}"
+    docker exec msqlchamo_mysql mysql -u root -prootpassword acme_corp -e "
+    SELECT 'Categories' AS table_name, COUNT(*) AS record_count FROM categories
+    UNION ALL
+    SELECT 'Customers', COUNT(*) FROM customers
+    UNION ALL
+    SELECT 'Products', COUNT(*) FROM products
+    UNION ALL
+    SELECT 'Orders', COUNT(*) FROM orders
+    UNION ALL
+    SELECT 'Order Items', COUNT(*) FROM order_items;
+    "
+else
+    echo -e "${YELLOW}ACME database not found. Run ./scripts/setup_acme_db.sh to create it.${NC}"
+fi
+
 # Test PostgreSQL connection using docker exec
 echo -e "\n${YELLOW}Testing PostgreSQL connection...${NC}"
 if docker exec msqlchamo_postgresql psql -U testuser -d testdb -c "\dt" 2>/dev/null; then

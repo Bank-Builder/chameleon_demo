@@ -14,12 +14,17 @@ A Python project with MySQL and PostgreSQL database setup using Docker Compose.
    docker-compose up -d
    ```
 
-2. **Test database connections:**
+2. **Setup ACME Corporation database (optional):**
+   ```bash
+   ./scripts/setup_acme_db.sh
+   ```
+
+3. **Test database connections:**
    ```bash
    ./scripts/test_databases.sh
    ```
 
-3. **Stop the databases:**
+4. **Stop the databases:**
    ```bash
    docker-compose down
    ```
@@ -44,9 +49,24 @@ A Python project with MySQL and PostgreSQL database setup using Docker Compose.
 The `scripts/test_databases.sh` script will:
 - Test connections to both databases using Docker exec
 - List system tables if connections are successful
+- Test ACME Corporation database if it exists
 - Provide colored output for easy reading
 - Fall back to alternative users if the primary connection fails
 - No local database clients required
+
+## ACME Corporation Database
+
+The project includes a sample ACME Corporation database with:
+- **5 tables**: categories, customers, products, orders, order_items
+- **Sample data**: Realistic e-commerce data for testing
+- **Proper relationships**: Foreign keys and constraints
+- **Performance indexes**: Optimized for queries
+- **Useful view**: order_summary for quick insights
+
+To setup the ACME database:
+```bash
+./scripts/setup_acme_db.sh
+```
 
 ## Project Structure
 
@@ -55,7 +75,9 @@ msqlchamo/
 ├── .gitignore           # Python gitignore file
 ├── docker-compose.yaml  # Database services configuration
 ├── scripts/             # Utility scripts
-│   └── test_databases.sh # Database connection test script
+│   ├── test_databases.sh    # Database connection test script
+│   ├── setup_acme_db.sh     # ACME database setup script
+│   └── acme_db.sql          # ACME database schema and sample data
 └── README.md            # This file
 ```
 
