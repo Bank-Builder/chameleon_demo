@@ -51,17 +51,14 @@ echo -e "\n${YELLOW}Configuring PostgreSQL for replication...${NC}"
 echo "Creating replication user in PostgreSQL..."
 docker exec msqlchamo_postgresql psql -U postgres -c "
 CREATE USER repl_user WITH PASSWORD 'repl_password';
-GRANT REPLICATION ON ALL TABLES IN SCHEMA public TO repl_user;
 GRANT USAGE ON SCHEMA public TO repl_user;
 GRANT CREATE ON SCHEMA public TO repl_user;
 "
 
 # Create replica database
 echo "Creating replica database..."
-docker exec msqlchamo_postgresql psql -U postgres -c "
-CREATE DATABASE acme_corp_replica;
-GRANT ALL PRIVILEGES ON DATABASE acme_corp_replica TO repl_user;
-"
+docker exec msqlchamo_postgresql psql -U postgres -c "CREATE DATABASE acme_corp_replica;"
+docker exec msqlchamo_postgresql psql -U postgres -c "GRANT ALL PRIVILEGES ON DATABASE acme_corp_replica TO repl_user;"
 
 # Grant additional privileges
 docker exec msqlchamo_postgresql psql -U postgres -d acme_corp_replica -c "

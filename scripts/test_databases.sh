@@ -52,19 +52,19 @@ fi
 
 # Test PostgreSQL connection using docker exec
 echo -e "\n${YELLOW}Testing PostgreSQL connection...${NC}"
-if docker exec msqlchamo_postgresql psql -U testuser -d testdb -c "\dt" 2>/dev/null; then
+if docker exec msqlchamo_postgresql psql -U postgres -d postgres -c "\dt" 2>/dev/null; then
     echo -e "${GREEN}PostgreSQL connection successful!${NC}"
     echo -e "${YELLOW}Listing PostgreSQL system tables:${NC}"
-    docker exec msqlchamo_postgresql psql -U testuser -d testdb -c "\dt"
+    docker exec msqlchamo_postgresql psql -U postgres -d postgres -c "\dt"
 else
     echo -e "${RED}PostgreSQL connection failed!${NC}"
-    echo "Trying with postgres user..."
-    if docker exec msqlchamo_postgresql psql -U postgres -d postgres -c "\dt" 2>/dev/null; then
-        echo -e "${GREEN}PostgreSQL postgres user connection successful!${NC}"
-        echo -e "${YELLOW}Listing PostgreSQL system tables:${NC}"
-        docker exec msqlchamo_postgresql psql -U postgres -d postgres -c "\dt"
+    echo "Trying with testdb..."
+    if docker exec msqlchamo_postgresql psql -U postgres -d testdb -c "\dt" 2>/dev/null; then
+        echo -e "${GREEN}PostgreSQL testdb connection successful!${NC}"
+        echo -e "${YELLOW}Listing PostgreSQL testdb tables:${NC}"
+        docker exec msqlchamo_postgresql psql -U postgres -d testdb -c "\dt"
     else
-        echo -e "${RED}PostgreSQL postgres user connection also failed!${NC}"
+        echo -e "${RED}PostgreSQL connection also failed!${NC}"
     fi
 fi
 
