@@ -1,0 +1,80 @@
+# pg_chameleon Configuration Template
+# Copy this file to ~/.pg_chameleon/configuration/config.yaml and customize
+
+global:
+  pid_dir: '~/.pg_chameleon/pid/'
+  log_dir: '~/.pg_chameleon/logs/'
+  log_level: info
+  log_file: '~/.pg_chameleon/logs/pg_chameleon.log'
+  log_rotation_age: 1d
+  log_rotation_size: 10M
+
+# MariaDB source configuration
+mysql:
+  host: 'msqlchamo_mysql'  # Docker service name for this project
+  port: 3306
+  user: 'repl_user'
+  password: 'repl_password'
+  charset: 'utf8'
+  connect_timeout: 10
+  read_timeout: 30
+  write_timeout: 30
+
+# PostgreSQL destination configuration
+postgresql:
+  host: 'msqlchamo_postgresql'  # Docker service name for this project
+  port: 5432
+  user: 'repl_user'
+  password: 'repl_password'
+  database: 'acme_corp_replica'
+  schema: 'public'
+  charset: 'utf8'
+  connect_timeout: 10
+  read_timeout: 30
+  write_timeout: 30
+
+# Replication settings
+replication:
+  type: 'row'
+  tables:
+    - 'acme_corp.categories'
+    - 'acme_corp.customers'
+    - 'acme_corp.products'
+    - 'acme_corp.orders'
+    - 'acme_corp.order_items'
+  exclude_tables: []
+  exclude_columns: []
+  batch_size: 1000
+  batch_timeout: 10
+  max_retries: 3
+  retry_delay: 5
+
+# Schema mapping (if needed)
+schema_mapping:
+  acme_corp: public
+
+# Data type mapping (if needed)
+type_mapping:
+  int: integer
+  bigint: bigint
+  varchar: varchar
+  text: text
+  decimal: numeric
+  timestamp: timestamp
+  datetime: timestamp
+  enum: varchar
+  boolean: boolean
+
+# For local development (non-Docker), use:
+# mysql:
+#   host: 'localhost'
+#   port: 3306
+#   user: 'repl_user'
+#   password: 'repl_password'
+#
+# postgresql:
+#   host: 'localhost'
+#   port: 5432
+#   user: 'repl_user'
+#   password: 'repl_password'
+#   database: 'acme_corp_replica'
