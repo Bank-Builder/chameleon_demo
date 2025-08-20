@@ -12,6 +12,9 @@ DROP TABLE IF EXISTS products;
 DROP TABLE IF EXISTS customers;
 DROP TABLE IF EXISTS categories;
 
+-- Drop view if it exists (for clean setup)
+DROP VIEW IF EXISTS order_summary;
+
 -- Create categories table
 CREATE TABLE categories (
     category_id INT AUTO_INCREMENT PRIMARY KEY,

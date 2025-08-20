@@ -9,6 +9,11 @@ NC='\033[0m' # No Color
 echo "Setting up chameleon replication..."
 echo "====================================="
 
+# mkdir -p ~/.pg_chameleon/configuration/
+# mkdir -p ~/.pg_chameleon/pid/
+# mkdir -p ~/.pg_chameleon/logs/
+# cp scripts/pg_chameleon_config.yaml ~/.pg_chameleon/configuration/default.yml
+
 # Check if containers are running
 if ! docker ps | grep -q cd_mysql; then
     echo -e "${RED}MariaDB container is not running. Please start it first with:${NC}"
