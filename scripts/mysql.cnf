@@ -1,0 +1,18 @@
+[mysqld]
+# Enable binary logging for replication
+log_bin = mysql-bin
+binlog_format = ROW
+server_id = 1
+log_bin_trust_function_creators = 1
+
+# Binary log settings
+expire_logs_days = 7
+max_binlog_size = 100M
+
+# Replication settings
+sync_binlog = 1
+innodb_flush_log_at_trx_commit = 1
+
+# Character set
+character_set_server = utf8mb4
+collation_server = utf8mb4_unicode_ci

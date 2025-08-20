@@ -22,19 +22,12 @@ if ! docker ps | grep -q msqlchamo_postgresql; then
     exit 1
 fi
 
-echo -e "\n${YELLOW}Configuring MariaDB for replication...${NC}"
-
-# Configure MariaDB binary logging
-echo "Setting up MariaDB binary logging..."
-docker exec msqlchamo_mysql mysql -u root -prootpassword -e "
-SET GLOBAL log_bin = ON;
-SET GLOBAL binlog_format = 'ROW';
-SET GLOBAL server_id = 1;
-SET GLOBAL log_bin_trust_function_creators = ON;
-"
+echo -e "\n${YELLOW}MariaDB binary logging is configured via mysql.cnf file.${NC}"
+echo "If you just updated the configuration, restart the container:"
+echo "docker-compose restart mysql"
 
 # Create replication user in MariaDB
-echo "Creating replication user in MariaDB..."
+echo -e "\n${YELLOW}Creating replication user in MariaDB...${NC}"
 docker exec msqlchamo_mysql mysql -u root -prootpassword -e "
 CREATE USER IF NOT EXISTS 'repl_user'@'%' IDENTIFIED BY 'repl_password';
 GRANT REPLICATION SLAVE ON *.* TO 'repl_user'@'%';
@@ -95,3 +88,6 @@ echo "- Replica database: acme_corp_replica"
 echo -e "\n${YELLOW}Test replication user connections:${NC}"
 echo "MariaDB: docker exec msqlchamo_mysql mysql -u repl_user -prepl_password -e 'SHOW DATABASES;'"
 echo "PostgreSQL: docker exec msqlchamo_postgresql psql -U repl_user -d acme_corp_replica -c '\dt'"
+echo -e "\n${YELLOW}Important:${NC}"
+echo "If binary logging is not enabled, restart the MariaDB container:"
+echo "docker-compose restart mysql"

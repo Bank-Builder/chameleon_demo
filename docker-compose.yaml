@@ -12,6 +12,7 @@ services:
       - "3306:3306"
     volumes:
       - mysql_data:/var/lib/mysql
+      - ./scripts/mysql.cnf:/etc/mysql/conf.d/replication.cnf:ro
     networks:
       - db_network
 
@@ -27,6 +28,14 @@ services:
       - "5432:5432"
     volumes:
       - postgresql_data:/var/lib/postgresql/data
+    command: >
+      postgres
+      -c wal_level=logical
+      -c max_wal_senders=10
+      -c max_replication_slots=10
+      -c hot_standby=on
+      -c max_logical_replication_workers=4
+      -c max_worker_processes=10
     networks:
       - db_network
 
