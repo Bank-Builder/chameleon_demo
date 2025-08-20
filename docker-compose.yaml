@@ -1,7 +1,7 @@
 services:
   mysql:
     image: mariadb:10.4
-    container_name: msqlchamo_mysql
+    container_name: cd_mysql
     restart: unless-stopped
     environment:
       MYSQL_ROOT_PASSWORD: rootpassword
@@ -18,7 +18,7 @@ services:
 
   postgresql:
     image: postgres:17
-    container_name: msqlchamo_postgresql
+    container_name: cd_postgresql
     restart: unless-stopped
     environment:
       POSTGRES_DB: testdb

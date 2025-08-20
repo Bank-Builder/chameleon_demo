@@ -55,48 +55,48 @@ wait_for_container() {
     return 1
 }
 
-# Function to wait for database to be ready
-wait_for_mysql() {
-    local max_attempts=30
-    local attempt=1
-    
-    print_status "Waiting for MySQL to be ready..."
-    
-    while [ $attempt -le $max_attempts ]; do
-        if docker exec msqlchamo_mysql mysql -u root -prootpassword -e "SELECT 1;" >/dev/null 2>&1; then
-            print_success "MySQL is ready!"
-            return 0
-        fi
+    # Function to wait for database to be ready
+    wait_for_mysql() {
+        local max_attempts=30
+        local attempt=1
         
-        print_status "Attempt $attempt/$max_attempts - waiting 2 seconds..."
-        sleep 2
-        attempt=$((attempt + 1))
-    done
-    
-    print_error "MySQL failed to become ready after $max_attempts attempts"
-    return 1
-}
+        print_status "Waiting for MySQL to be ready..."
+        
+        while [ $attempt -le $max_attempts ]; do
+            if docker exec cd_mysql mysql -u root -prootpassword -e "SELECT 1;" >/dev/null 2>&1; then
+                print_success "MySQL is ready!"
+                return 0
+            fi
+            
+            print_status "Attempt $attempt/$max_attempts - waiting 2 seconds..."
+            sleep 2
+            attempt=$((attempt + 1))
+        done
+        
+        print_error "MySQL failed to become ready after $max_attempts attempts"
+        return 1
+    }
 
-wait_for_postgresql() {
-    local max_attempts=30
-    local attempt=1
-    
-    print_status "Waiting for PostgreSQL to be ready..."
-    
-    while [ $attempt -le $max_attempts ]; do
-        if docker exec msqlchamo_postgresql psql -U postgres -d postgres -c "SELECT 1;" >/dev/null 2>&1; then
-            print_success "PostgreSQL is ready!"
-            return 0
-        fi
+    wait_for_postgresql() {
+        local max_attempts=30
+        local attempt=1
         
-        print_status "Attempt $attempt/$max_attempts - waiting 2 seconds..."
-        sleep 2
-        attempt=$((attempt + 1))
-    done
-    
-    print_error "PostgreSQL failed to become ready after $max_attempts attempts"
-    return 1
-}
+        print_status "Waiting for PostgreSQL to be ready..."
+        
+        while [ $attempt -le $max_attempts ]; do
+            if docker exec cd_postgresql psql -U postgres -d postgres -c "SELECT 1;" >/dev/null 2>&1; then
+                print_success "PostgreSQL is ready!"
+                return 0
+            fi
+            
+            print_status "Attempt $attempt/$max_attempts - waiting 2 seconds..."
+            sleep 2
+            attempt=$((attempt + 1))
+        done
+        
+        print_error "PostgreSQL failed to become ready after $max_attempts attempts"
+        return 1
+    }
 
 # Main execution
 main() {
@@ -107,7 +107,7 @@ main() {
     echo "- Setting up ACME Corporation database"
     echo "- Configuring replication users and databases"
     echo "- Testing all connections"
-    echo "- Setting up pg_chameleon replication"
+    echo "- Setting up chameleon replication"
     
     # Check prerequisites
     print_section "Checking Prerequisites"
@@ -152,7 +152,7 @@ main() {
     
     # Force remove any lingering containers with our names
     print_status "Cleaning up any lingering containers..."
-    docker rm -f msqlchamo_mysql msqlchamo_postgresql 2>/dev/null || true
+    docker rm -f cd_mysql cd_postgresql 2>/dev/null || true
     print_success "Existing containers stopped and cleaned up."
     
     # Start containers
@@ -204,44 +204,44 @@ main() {
         exit 1
     fi
     
-    # Setup pg_chameleon
-    print_section "Setting up pg_chameleon Replication"
+    # Setup chameleon
+    print_section "Setting up Chameleon Replication"
     
-    # Check if pg_chameleon is installed
-    if ! command_exists pg_chameleon; then
-        print_status "pg_chameleon not found. Installing..."
+    # Check if chameleon is installed
+    if ! command_exists chameleon; then
+        print_status "chameleon not found. Installing..."
         if pip install pg_chameleon; then
-            print_success "pg_chameleon installed successfully!"
+            print_success "chameleon installed successfully!"
             # Refresh PATH to find the newly installed command
             export PATH="$HOME/.local/bin:$PATH"
             if [ -f ".venv/bin/activate" ]; then
                 source .venv/bin/activate
             fi
         else
-            print_error "Failed to install pg_chameleon!"
+            print_error "Failed to install chameleon!"
             print_status "Please install manually: pip install pg_chameleon"
         fi
     else
-        print_success "pg_chameleon is already installed!"
+        print_success "chameleon is already installed!"
     fi
     
-    # Create pg_chameleon configuration directory
-    print_status "Setting up pg_chameleon configuration..."
+    # Create chameleon configuration directory
+    print_status "Setting up chameleon configuration..."
     mkdir -p ~/.pg_chameleon/configuration
     
     # Copy configuration file
     if [ -f "scripts/pg_chameleon_config.yaml" ]; then
-        cp scripts/pg_chameleon_config.yaml ~/.pg_chameleon/configuration/config.yaml
-        print_success "Configuration file copied!"
+        cp scripts/pg_chameleon_config.yaml ~/.pg_chameleon/configuration/default.yml
+        print_success "Configuration file copied as default.yml!"
     else
-        print_error "pg_chameleon configuration file not found!"
+        print_error "chameleon configuration file not found!"
         exit 1
     fi
     
-    # Initialize pg_chameleon
-    print_status "Initializing pg_chameleon..."
-    if python -m pg_chameleon create_replica_schema; then
-        print_success "pg_chameleon replica schema created!"
+    # Initialize chameleon
+    print_status "Initializing chameleon..."
+    if chameleon create_replica_schema; then
+        print_success "chameleon replica schema created!"
     else
         print_error "Failed to create replica schema!"
         exit 1
@@ -249,7 +249,7 @@ main() {
     
     # Add source
     print_status "Adding MySQL source..."
-    if python -m pg_chameleon add_source --config default; then
+    if chameleon add_source --config default; then
         print_success "MySQL source added!"
     else
         print_error "Failed to add MySQL source!"
@@ -258,7 +258,7 @@ main() {
     
     # Initialize replica
     print_status "Initializing replica..."
-    if python -m pg_chameleon init_replica --config default --source mysql; then
+    if chameleon init_replica --config default --source mysql; then
         print_success "Replica initialized!"
     else
         print_error "Failed to initialize replica!"
@@ -267,7 +267,7 @@ main() {
     
     # Start replication
     print_status "Starting replication..."
-    if python -m pg_chameleon start_replica --config default; then
+    if chameleon start_replica --config default; then
         print_success "Replication started!"
     else
         print_error "Failed to start replication!"
@@ -277,7 +277,7 @@ main() {
     # Final verification
     print_section "Final Verification"
     print_status "Checking replication status..."
-    if python -m pg_chameleon show_status --config default; then
+    if chameleon show_status --config default; then
         print_success "Replication status retrieved!"
     else
         print_error "Failed to get replication status!"
@@ -285,7 +285,7 @@ main() {
     
     # Test replica database
     print_status "Testing replica database..."
-    if docker exec msqlchamo_postgresql psql -U repl_user -d acme_corp_replica -c "\dt" 2>/dev/null; then
+    if docker exec cd_postgresql psql -U repl_user -d acme_corp_replica -c "\dt" 2>/dev/null; then
         print_success "Replica database is accessible!"
     else
         print_error "Replica database is not accessible!"
@@ -298,14 +298,14 @@ main() {
     echo "- MySQL container with ACME Corporation database"
     echo "- PostgreSQL container with replica database"
     echo "- Replication users and permissions"
-    echo "- pg_chameleon replication system"
+    echo "- chameleon replication system"
     echo "- Active replication from MySQL to PostgreSQL"
     echo ""
     echo "Useful commands:"
-    echo "- Check replication status: pg_chameleon show_status --config default"
-    echo "- Stop replication: pg_chameleon stop_replica --config default"
-    echo "- Start replication: pg_chameleon start_replica --config default"
-    echo "- View replica data: docker exec msqlchamo_postgresql psql -U repl_user -d acme_corp_replica -c 'SELECT * FROM categories;'"
+    echo "- Check replication status: chameleon show_status --config default"
+    echo "- Stop replication: chameleon stop_replica --config default"
+    echo "- Start replication: chameleon start_replica --config default"
+    echo "- View replica data: docker exec cd_postgresql psql -U repl_user -d acme_corp_replica -c 'SELECT * FROM categories;'"
     echo ""
     echo "The replication is now running and will automatically sync changes from MySQL to PostgreSQL!"
 }

@@ -11,17 +11,17 @@ echo "================================"
 
 # Test MySQL connection using docker exec
 echo -e "\n${YELLOW}Testing MySQL connection...${NC}"
-if docker exec msqlchamo_mysql mysql -u testuser -ptestpass testdb -e "SHOW TABLES;" 2>/dev/null; then
+if docker exec cd_mysql mysql -u testuser -ptestpass testdb -e "SHOW TABLES;" 2>/dev/null; then
     echo -e "${GREEN}MySQL connection successful!${NC}"
     echo -e "${YELLOW}Listing MySQL system tables:${NC}"
-    docker exec msqlchamo_mysql mysql -u testuser -ptestpass testdb -e "SHOW TABLES;"
+    docker exec cd_mysql mysql -u testuser -ptestpass testdb -e "SHOW TABLES;"
 else
     echo -e "${RED}MySQL connection failed!${NC}"
     echo "Trying with root user..."
-    if docker exec msqlchamo_mysql mysql -u root -prootpassword -e "SHOW DATABASES;" 2>/dev/null; then
+    if docker exec cd_mysql mysql -u root -prootpassword -e "SHOW DATABASES;" 2>/dev/null; then
         echo -e "${GREEN}MySQL root connection successful!${NC}"
         echo -e "${YELLOW}Listing MySQL system tables:${NC}"
-        docker exec msqlchamo_mysql mysql -u root -prootpassword -e "SHOW TABLES FROM information_schema;"
+        docker exec cd_mysql mysql -u root -prootpassword -e "SHOW TABLES FROM information_schema;"
     else
         echo -e "${RED}MySQL root connection also failed!${NC}"
     fi
@@ -29,13 +29,13 @@ fi
 
 # Test ACME database if it exists
 echo -e "\n${YELLOW}Testing ACME Corporation database...${NC}"
-if docker exec msqlchamo_mysql mysql -u root -prootpassword -e "USE acme_corp; SHOW TABLES;" 2>/dev/null; then
+if docker exec cd_mysql mysql -u root -prootpassword -e "USE acme_corp; SHOW TABLES;" 2>/dev/null; then
     echo -e "${GREEN}ACME database found!${NC}"
     echo -e "${YELLOW}ACME database tables:${NC}"
-    docker exec msqlchamo_mysql mysql -u root -prootpassword acme_corp -e "SHOW TABLES;"
+    docker exec cd_mysql mysql -u root -prootpassword acme_corp -e "SHOW TABLES;"
     
     echo -e "\n${YELLOW}ACME database sample data summary:${NC}"
-    docker exec msqlchamo_mysql mysql -u root -prootpassword acme_corp -e "
+    docker exec cd_mysql mysql -u root -prootpassword acme_corp -e "
     SELECT 'Categories' AS table_name, COUNT(*) AS record_count FROM categories
     UNION ALL
     SELECT 'Customers', COUNT(*) FROM customers
@@ -52,17 +52,17 @@ fi
 
 # Test PostgreSQL connection using docker exec
 echo -e "\n${YELLOW}Testing PostgreSQL connection...${NC}"
-if docker exec msqlchamo_postgresql psql -U postgres -d postgres -c "\dt" 2>/dev/null; then
+if docker exec cd_postgresql psql -U postgres -d postgres -c "\dt" 2>/dev/null; then
     echo -e "${GREEN}PostgreSQL connection successful!${NC}"
     echo -e "${YELLOW}Listing PostgreSQL system tables:${NC}"
-    docker exec msqlchamo_postgresql psql -U postgres -d postgres -c "\dt"
+    docker exec cd_postgresql psql -U postgres -d postgres -c "\dt"
 else
     echo -e "${RED}PostgreSQL connection failed!${NC}"
     echo "Trying with testdb..."
-    if docker exec msqlchamo_postgresql psql -U postgres -d testdb -c "\dt" 2>/dev/null; then
+    if docker exec cd_postgresql psql -U postgres -d testdb -c "\dt" 2>/dev/null; then
         echo -e "${GREEN}PostgreSQL testdb connection successful!${NC}"
         echo -e "${YELLOW}Listing PostgreSQL testdb tables:${NC}"
-        docker exec msqlchamo_postgresql psql -U postgres -d testdb -c "\dt"
+        docker exec cd_postgresql psql -U postgres -d testdb -c "\dt"
     else
         echo -e "${RED}PostgreSQL connection also failed!${NC}"
     fi

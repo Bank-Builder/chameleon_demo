@@ -1,5 +1,5 @@
-# pg_chameleon Configuration Template
-# Copy this file to ~/.pg_chameleon/configuration/config.yaml and customize
+# chameleon Configuration Template
+# Copy this file to ~/.pg_chameleon/configuration/default.yml and customize
 
 global:
   pid_dir: '~/.pg_chameleon/pid/'
@@ -11,7 +11,7 @@ global:
 
 # MariaDB source configuration
 mysql:
-  host: 'msqlchamo_mysql'  # Docker service name for this project
+  host: 'cd_mysql'  # Docker service name for this project
   port: 3306
   user: 'repl_user'
   password: 'repl_password'
@@ -22,7 +22,7 @@ mysql:
 
 # PostgreSQL destination configuration
 postgresql:
-  host: 'msqlchamo_postgresql'  # Docker service name for this project
+  host: 'cd_postgresql'  # Docker service name for this project
   port: 5432
   user: 'repl_user'
   password: 'repl_password'

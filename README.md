@@ -1,4 +1,4 @@
-# MSQLChamo
+# CD
 
 A Python project with MySQL and PostgreSQL database setup using Docker Compose.
 
@@ -34,11 +34,11 @@ A Python project with MySQL and PostgreSQL database setup using Docker Compose.
    docker-compose down
    ```
 
-## pg_chameleon Setup Steps
+## Chameleon Setup Steps
 
 After running `./scripts/setup_replication.sh`, follow these steps to complete the replication setup:
 
-1. **Install pg_chameleon:**
+1. **Install chameleon:**
    ```bash
    pip install pg_chameleon
    ```
@@ -50,15 +50,15 @@ After running `./scripts/setup_replication.sh`, follow these steps to complete t
 
 3. **Copy the configuration template:**
    ```bash
-   cp scripts/pg_chameleon_config.yaml ~/.pg_chameleon/configuration/config.yaml
+   cp scripts/pg_chameleon_config.yaml ~/.pg_chameleon/configuration/default.yml
    ```
 
 4. **Initialize replication:**
    ```bash
-   pg_chameleon create_replica_schema
-   pg_chameleon add_source --config default
-   pg_chameleon init_replica --config default --source mysql
-   pg_chameleon start_replica --config default
+   chameleon create_replica_schema
+   chameleon add_source --config default
+   chameleon init_replica --config default --source mysql
+   chameleon start_replica --config default
    ```
 
 ## Database Configuration
@@ -111,7 +111,7 @@ msqlchamo/
 │   ├── setup_acme_db.sh         # ACME database setup script
 │   ├── acme_db.sql              # ACME database schema and sample data
 │   ├── setup_replication.sh     # Database replication setup script
-│   ├── pg_chameleon_config.yaml # pg_chameleon configuration template
+│   ├── pg_chameleon_config.yaml # chameleon configuration template
 │   └── mysql.cnf                # MariaDB configuration for replication
 └── README.md            # This file
 ```
@@ -123,7 +123,7 @@ This project is set up for Python development with:
 - Comprehensive `.gitignore` for Python projects
 - Docker-based database development environment
 
-## pg_chameleon Replication Setup
+## Chameleon Replication Setup
 
 pg_chameleon is a MySQL/MariaDB to PostgreSQL replication tool that allows you to replicate data from MariaDB to PostgreSQL in real-time.
 
@@ -136,7 +136,7 @@ pg_chameleon is a MySQL/MariaDB to PostgreSQL replication tool that allows you t
 ### Installation
 
 ```bash
-# Install pg_chameleon
+# Install chameleon
 pip install pg_chameleon
 
 # Or install from source
@@ -145,7 +145,7 @@ cd pg_chameleon
 pip install -e .
 ```
 
-**Note:** See the [pg_chameleon Setup Steps](#pg_chameleon-setup-steps) section below for complete setup instructions.
+**Note:** See the [Chameleon Setup Steps](#chameleon-setup-steps) section below for complete setup instructions.
 
 ### MariaDB Replication Configuration
 
@@ -161,7 +161,7 @@ pip install -e .
 2. **Verify Binary Logging Configuration:**
    ```sql
    -- Connect to MariaDB as root
-   docker exec -it msqlchamo_mysql mysql -u root -prootpassword
+   docker exec -it cd_mysql mysql -u root -prootpassword
    
    -- Check current binary log status
    SHOW VARIABLES LIKE 'log_bin';
@@ -209,7 +209,7 @@ pip install -e .
    GRANT USAGE ON SCHEMA public TO repl_user;
    ```
 
-### pg_chameleon Configuration
+### Chameleon Configuration
 
 1. **Create Configuration Directory:**
    ```bash
@@ -218,12 +218,12 @@ pip install -e .
 
 2. **Create Configuration File:**
    ```yaml
-   # ~/.pg_chameleon/configuration/config.yaml
+   # ~/.pg_chameleon/configuration/default.yml
    global:
      pid_dir: '~/.pg_chameleon/pid/'
      log_dir: '~/.pg_chameleon/logs/'
      log_level: info
-     log_file: '~/.pg_chameleon/logs/pg_chameleon.log'
+     log_file: '~/.pg_chameleon/logs/chameleon.log'
      log_rotation_age: 1d
      log_rotation_size: 10M
    
@@ -287,28 +287,28 @@ pip install -e .
 3. **Initialize Replication:**
    ```bash
    # Create replica schema in PostgreSQL
-   pg_chameleon create_replica_schema
+   chameleon create_replica_schema
    
    # Add source (MariaDB)
-   pg_chameleon add_source --config default
+   chameleon add_source --config default
    
    # Initialize tables (one-time copy)
-   pg_chameleon init_replica --config default --source mysql
+   chameleon init_replica --config default --source mysql
    
    # Start replication
-   pg_chameleon start_replica --config default
+   chameleon start_replica --config default
    ```
 
 4. **Monitor Replication:**
    ```bash
    # Check replication status
-   pg_chameleon show_status --config default
+   chameleon show_status --config default
    
    # Check replication lag
-   pg_chameleon show_lag --config default
+   chameleon show_lag --config default
    
    # Stop replication
-   pg_chameleon stop_replica --config default
+   chameleon stop_replica --config default
    ```
 
 ### Docker-Specific Configuration
@@ -317,13 +317,13 @@ For this project's Docker setup, update the configuration:
 
 ```yaml
 mysql:
-  host: 'msqlchamo_mysql'  # Docker service name
+  host: 'cd_mysql'  # Docker service name
   port: 3306
   user: 'repl_user'
   password: 'repl_password'
 
 postgresql:
-  host: 'msqlchamo_postgresql'  # Docker service name
+  host: 'cd_postgresql'  # Docker service name
   port: 5432
   user: 'repl_user'
   password: 'repl_password'
@@ -355,16 +355,16 @@ postgresql:
 
 ```bash
 # Check replication status
-pg_chameleon show_status --config default
+   chameleon show_status --config default
 
 # View logs
-tail -f ~/.pg_chameleon/logs/pg_chameleon.log
+   tail -f ~/.pg_chameleon/logs/chameleon.log
 
 # Reset replication
-pg_chameleon drop_replica_schema --config default
-pg_chameleon create_replica_schema --config default
-pg_chameleon init_replica --config default --source mysql
+chameleon drop_replica_schema --config default
+chameleon create_replica_schema --config default
+chameleon init_replica --config default --source mysql
 
 # Emergency stop
-pg_chameleon stop_replica --config default
+chameleon stop_replica --config default
 ```
