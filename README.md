@@ -34,6 +34,33 @@ A Python project with MySQL and PostgreSQL database setup using Docker Compose.
    docker-compose down
    ```
 
+## pg_chameleon Setup Steps
+
+After running `./scripts/setup_replication.sh`, follow these steps to complete the replication setup:
+
+1. **Install pg_chameleon:**
+   ```bash
+   pip install pg_chameleon
+   ```
+
+2. **Create configuration directory:**
+   ```bash
+   mkdir -p ~/.pg_chameleon/configuration
+   ```
+
+3. **Copy the configuration template:**
+   ```bash
+   cp scripts/pg_chameleon_config.yaml ~/.pg_chameleon/configuration/config.yaml
+   ```
+
+4. **Initialize replication:**
+   ```bash
+   pg_chameleon create_replica_schema
+   pg_chameleon add_source --config default
+   pg_chameleon init_replica --config default --source mysql
+   pg_chameleon start_replica --config default
+   ```
+
 ## Database Configuration
 
 ### MySQL
@@ -84,7 +111,8 @@ msqlchamo/
 │   ├── setup_acme_db.sh         # ACME database setup script
 │   ├── acme_db.sql              # ACME database schema and sample data
 │   ├── setup_replication.sh     # Database replication setup script
-│   └── pg_chameleon_config.yaml # pg_chameleon configuration template
+│   ├── pg_chameleon_config.yaml # pg_chameleon configuration template
+│   └── mysql.cnf                # MariaDB configuration for replication
 └── README.md            # This file
 ```
 
@@ -117,9 +145,20 @@ cd pg_chameleon
 pip install -e .
 ```
 
+**Note:** See the [pg_chameleon Setup Steps](#pg_chameleon-setup-steps) section below for complete setup instructions.
+
 ### MariaDB Replication Configuration
 
-1. **Enable Binary Logging in MariaDB:**
+1. **Binary Logging is automatically enabled via configuration file:**
+   ```bash
+   # The docker-compose.yaml mounts a custom mysql.cnf file
+   # that enables binary logging with proper settings
+   
+   # If you need to restart MariaDB to apply new config:
+   docker-compose restart mysql
+   ```
+
+2. **Verify Binary Logging Configuration:**
    ```sql
    -- Connect to MariaDB as root
    docker exec -it msqlchamo_mysql mysql -u root -prootpassword
@@ -127,11 +166,7 @@ pip install -e .
    -- Check current binary log status
    SHOW VARIABLES LIKE 'log_bin';
    SHOW VARIABLES LIKE 'binlog_format';
-   
-   -- If not enabled, add to my.cnf or set dynamically
-   SET GLOBAL log_bin = ON;
-   SET GLOBAL binlog_format = 'ROW';
-   SET GLOBAL server_id = 1;
+   SHOW VARIABLES LIKE 'server_id';
    ```
 
 2. **Create Replication User:**
