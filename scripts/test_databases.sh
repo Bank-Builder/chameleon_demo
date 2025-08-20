@@ -9,50 +9,40 @@ NC='\033[0m' # No Color
 echo "Testing database connections..."
 echo "================================"
 
-# Test MySQL connection
+# Test MySQL connection using docker exec
 echo -e "\n${YELLOW}Testing MySQL connection...${NC}"
-if command -v mysql &> /dev/null; then
-    if mysql -h localhost -P 3306 -u testuser -ptestpass testdb -e "SHOW TABLES;" 2>/dev/null; then
-        echo -e "${GREEN}MySQL connection successful!${NC}"
-        echo -e "${YELLOW}Listing MySQL system tables:${NC}"
-        mysql -h localhost -P 3306 -u testuser -ptestpass testdb -e "SHOW TABLES;" 2>/dev/null
-    else
-        echo -e "${RED}MySQL connection failed!${NC}"
-        echo "Trying with root user..."
-        if mysql -h localhost -P 3306 -u root -prootpassword -e "SHOW DATABASES;" 2>/dev/null; then
-            echo -e "${GREEN}MySQL root connection successful!${NC}"
-            echo -e "${YELLOW}Listing MySQL system tables:${NC}"
-            mysql -h localhost -P 3306 -u root -prootpassword -e "SHOW TABLES FROM information_schema;" 2>/dev/null
-        else
-            echo -e "${RED}MySQL root connection also failed!${NC}"
-        fi
-    fi
+if docker exec msqlchamo_mysql mysql -u testuser -ptestpass testdb -e "SHOW TABLES;" 2>/dev/null; then
+    echo -e "${GREEN}MySQL connection successful!${NC}"
+    echo -e "${YELLOW}Listing MySQL system tables:${NC}"
+    docker exec msqlchamo_mysql mysql -u testuser -ptestpass testdb -e "SHOW TABLES;"
 else
-    echo -e "${RED}MySQL client not installed. Please install mysql-client.${NC}"
+    echo -e "${RED}MySQL connection failed!${NC}"
+    echo "Trying with root user..."
+    if docker exec msqlchamo_mysql mysql -u root -prootpassword -e "SHOW DATABASES;" 2>/dev/null; then
+        echo -e "${GREEN}MySQL root connection successful!${NC}"
+        echo -e "${YELLOW}Listing MySQL system tables:${NC}"
+        docker exec msqlchamo_mysql mysql -u root -prootpassword -e "SHOW TABLES FROM information_schema;"
+    else
+        echo -e "${RED}MySQL root connection also failed!${NC}"
+    fi
 fi
 
-# Test PostgreSQL connection
+# Test PostgreSQL connection using docker exec
 echo -e "\n${YELLOW}Testing PostgreSQL connection...${NC}"
-if command -v psql &> /dev/null; then
-    export PGPASSWORD=testpass
-    if psql -h localhost -p 5432 -U testuser -d testdb -c "\dt" 2>/dev/null; then
-        echo -e "${GREEN}PostgreSQL connection successful!${NC}"
-        echo -e "${YELLOW}Listing PostgreSQL system tables:${NC}"
-        psql -h localhost -p 5432 -U testuser -d testdb -c "\dt" 2>/dev/null
-    else
-        echo -e "${RED}PostgreSQL connection failed!${NC}"
-        echo "Trying with postgres user..."
-        export PGPASSWORD=testpass
-        if psql -h localhost -p 5432 -U postgres -d postgres -c "\dt" 2>/dev/null; then
-            echo -e "${GREEN}PostgreSQL postgres user connection successful!${NC}"
-            echo -e "${YELLOW}Listing PostgreSQL system tables:${NC}"
-            psql -h localhost -p 5432 -U postgres -d postgres -c "\dt" 2>/dev/null
-        else
-            echo -e "${RED}PostgreSQL postgres user connection also failed!${NC}"
-        fi
-    fi
+if docker exec msqlchamo_postgresql psql -U testuser -d testdb -c "\dt" 2>/dev/null; then
+    echo -e "${GREEN}PostgreSQL connection successful!${NC}"
+    echo -e "${YELLOW}Listing PostgreSQL system tables:${NC}"
+    docker exec msqlchamo_postgresql psql -U testuser -d testdb -c "\dt"
 else
-    echo -e "${RED}PostgreSQL client not installed. Please install postgresql-client.${NC}"
+    echo -e "${RED}PostgreSQL connection failed!${NC}"
+    echo "Trying with postgres user..."
+    if docker exec msqlchamo_postgresql psql -U postgres -d postgres -c "\dt" 2>/dev/null; then
+        echo -e "${GREEN}PostgreSQL postgres user connection successful!${NC}"
+        echo -e "${YELLOW}Listing PostgreSQL system tables:${NC}"
+        docker exec msqlchamo_postgresql psql -U postgres -d postgres -c "\dt"
+    else
+        echo -e "${RED}PostgreSQL postgres user connection also failed!${NC}"
+    fi
 fi
 
 echo -e "\n${YELLOW}Database connection test completed.${NC}"

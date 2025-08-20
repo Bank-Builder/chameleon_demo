@@ -5,8 +5,7 @@ A Python project with MySQL and PostgreSQL database setup using Docker Compose.
 ## Prerequisites
 
 - Docker and Docker Compose installed
-- MySQL client (optional, for testing)
-- PostgreSQL client (optional, for testing)
+- No local database clients required (uses Docker exec)
 
 ## Quick Start
 
@@ -43,10 +42,11 @@ A Python project with MySQL and PostgreSQL database setup using Docker Compose.
 ## Testing Database Connections
 
 The `scripts/test_databases.sh` script will:
-- Test connections to both databases
+- Test connections to both databases using Docker exec
 - List system tables if connections are successful
 - Provide colored output for easy reading
 - Fall back to alternative users if the primary connection fails
+- No local database clients required
 
 ## Project Structure
 
